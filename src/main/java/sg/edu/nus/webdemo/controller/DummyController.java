@@ -31,13 +31,6 @@ public class DummyController {
 	@GetMapping()
 	public String getTestResults(Model m) {
 		
-		Category c1 = new Category("Kitchen Knives", "Simple Home Knives");
-		Category c2 = new Category("Chef Knives", "Simple Professional Knives");
-		Category c3 = new Category("Protection Gear", "Knife Glove");
-		catSvc.saveCategory(c1);
-		catSvc.saveCategory(c2);
-		catSvc.saveCategory(c3);
-		
 		Tag t1 = new Tag("Professional");
 		Tag t2 = new Tag("On Sale");
 		Tag t3 = new Tag("Carbon");
@@ -47,8 +40,15 @@ public class DummyController {
 		tagSvc.saveTag(t3);
 		tagSvc.saveTag(t4);
 		
+		Category c1 = new Category("Kitchen Knives", "Simple Home Knives");
+		Category c2 = new Category("Chef Knives", "Simple Professional Knives");
+		Category c3 = new Category("Protection Gear", "Knife Glove");
+		catSvc.saveCategory(c1);
+		catSvc.saveCategory(c2);
+		catSvc.saveCategory(c3);
+		
 		User u1 = new User("ahbeng", "password", "ahbeng@nus.edu.sg", 
-			"AH", "BENG", LocalDate.of(2000, 3, 29));
+			"AH", "BENG", LocalDate.of(2000, 3, 29), null);
 		userSvc.saveUser(u1);
 		
 		m.addAttribute("okmessage", "allok");

@@ -8,12 +8,9 @@ import sg.edu.nus.webdemo.model.Category;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
 	// check if cat name exists
-	public boolean existsByName(String catName);
+	public boolean existsByCategoryName(String catName);
 	
 	// find cat by cat name
-	public Optional<Category> findByName(String catName);
-	
-	// delete cat
-	public void deleteByName(String catName);
+	public Optional<Category> findByCategoryName(String catName);
 	
 }

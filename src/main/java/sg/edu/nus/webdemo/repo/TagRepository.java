@@ -8,12 +8,12 @@ import sg.edu.nus.webdemo.model.Tag;
 public interface TagRepository extends JpaRepository<Tag, Long>{
 
 	// find tag by name
-	public Optional<Tag> findByName(String tagName);
+	public Optional<Tag> findByTagName(String tagName);
 	
 	// tag exist check
-	public boolean existsByName(String tagName);
+	public boolean existsByTagName(String tagName);
 	
 	// delete tag by name
-	public void deleteByName(String tagName);
+	public void deleteByTagName(String tagName);
 	
 }

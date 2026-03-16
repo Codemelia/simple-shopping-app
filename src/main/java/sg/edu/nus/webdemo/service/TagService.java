@@ -19,14 +19,14 @@ public class TagService {
 	public Tag saveTag(Tag tag) {
 	    if (tag == null) return new Tag();
 	    // only block duplicates for new tags
-	    if (tag.getId() == null && tagExists(tag.getName()))
+	    if (tag.getId() == null && tagExists(tag.getTagName()))
 	        return new Tag();
 	    return tagRepo.save(tag);
 	}
 	
 	// find tag by name
 	public Optional<Tag> findTagByName(String tagName) {
-		return tagRepo.findByName(tagName);
+		return tagRepo.findByTagName(tagName);
 	}
 	
 	// find all tags
@@ -36,12 +36,12 @@ public class TagService {
 	
 	// delete tag
 	public void deleteTagByName(String tagName) {
-		tagRepo.deleteByName(tagName);
+		tagRepo.deleteByTagName(tagName);
 	}
 	
 	// tag exist check
 	public boolean tagExists(String tagName) {
-		return tagRepo.existsByName(tagName);
+		return tagRepo.existsByTagName(tagName);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import sg.edu.nus.webdemo.model.User;
@@ -15,12 +16,31 @@ public class UserService {
 	@Autowired
 	UserRepository userRepo;
 	
+	@Autowired
+	PasswordEncoder encoder;
+	
 	// save user and return boolean on save success/fail
 	public User saveUser(User user) {
+		// handle invalid user object
 	    if (user == null) return new User();
-	    // only block duplicates for new users
-	    if (user.getId() == null && userExists(user.getUsername()))
-	        return new User();
+	    
+	    // for new users, encode password
+	    else if (user.getId() == null) {
+	    	user.setUserPassword(encoder.encode(user.getUserPassword()));
+	    	return userRepo.save(user);
+	    }
+	    
+	    // users are existing from here, retrieve user object
+	    User existUser = userRepo.findByUsername(user.getUsername()).orElse(null);    	
+    	if (existUser == null) return new User();
+	    
+	    // if input password is null or blank
+	    // retrieve existing user password and set it
+    	// else retrieve new input password and set it
+    	else if (user.getUserPassword() == null || user.getUserPassword().isBlank())
+	    	user.setUserPassword(existUser.getUserPassword());
+    	else user.setUserPassword(encoder.encode(user.getUserPassword()));
+    	
 	    return userRepo.save(user);
 	}
 	

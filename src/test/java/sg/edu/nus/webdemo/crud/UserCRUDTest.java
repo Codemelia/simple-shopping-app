@@ -2,7 +2,6 @@ package sg.edu.nus.webdemo.crud;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,11 +12,14 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.context.annotation.Import;
 
+import sg.edu.nus.webdemo.config.SecurityConfig;
 import sg.edu.nus.webdemo.model.User;
 import sg.edu.nus.webdemo.service.UserService;
 
 @DataJpaTest // declare as a jpa test
-@Import(UserService.class) // imports service class for injection
+@Import({UserService.class, SecurityConfig.class}) // imports classes for injection for testing
+//@Sql(scripts = "/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+//@Sql({"/data.sql"})
 public class UserCRUDTest {
 	
 	@Autowired
@@ -56,8 +58,8 @@ public class UserCRUDTest {
 	@Test
 	@DisplayName("03 Find All Users")
 	public void findUsers() {
-		em.persistAndFlush(createTestUser1()); // save using test entity manager
-		em.persistAndFlush(createTestUser2());
+		 em.persistAndFlush(createTestUser1()); // save using test entity manager
+		 em.persistAndFlush(createTestUser2());
 		List<User> users = userSvc.findAllUsers();
 		assertThat(users)
 			.isNotEmpty() // checks that list is not empty
@@ -69,7 +71,7 @@ public class UserCRUDTest {
 	@DisplayName("04 Update Existing User")
 	public void updateUser() {
 		User savedUser = em.persistAndFlush(createTestUser1()); // save using test entity manager
-		savedUser.setBirthDate(LocalDate.of(2000, 03, 29)); // update birthdate
+		savedUser.setUsername("lia123"); // update username
 		User updatedUser = userSvc.saveUser(savedUser);
 		assertThat(updatedUser.getBirthDate())
 			.isNotNull()
@@ -82,18 +84,18 @@ public class UserCRUDTest {
 	public void deleteUser() {
 		User savedUser = em.persist(createTestUser1()); // save using test entity manager
 		userSvc.deleteUserByUsername(savedUser.getUsername());
-		User retrievedUser = em.find(User.class, savedUser.getId());
+		User retrievedUser = em.find(User.class, 1);
 		assertThat(retrievedUser)
 			.isNull(); // should be null
 	}
 
 	// data for testing
 	private User createTestUser1() {
-		return new User("ahbeng1", "password", "ahbeng1@nus.edu.sg", "AH1", "BENG1", null);
+		return new User("ahbeng1", "password", "ahbeng1@nus.edu.sg", "AH1", "BENG1", null, null);
 	}
 	
 	private User createTestUser2() {
-		return new User("ahbeng2", "password", "ahbeng2@nus.edu.sg", "AH2", "BENG2", null);
+		return new User("ahbeng2", "password", "ahbeng2@nus.edu.sg", "AH2", "BENG2", null, null);
 	}
 
 }

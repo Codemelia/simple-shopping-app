@@ -17,6 +17,8 @@ import sg.edu.nus.webdemo.service.TagService;
 
 @DataJpaTest
 @Import(TagService.class) // import tag service class	
+//@Sql(scripts = "/schema.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+//@Sql({"/data.sql"})
 public class TagCRUDTest {
 	
 	@Autowired
@@ -40,7 +42,7 @@ public class TagCRUDTest {
 	@DisplayName("02 Find Tag By Name")
 	public void findTagByName() {
 		Tag savedTag = em.persistAndFlush(createTestTag1());
-		Optional<Tag> optTag = tagSvc.findTagByName(savedTag.getName());
+		Optional<Tag> optTag = tagSvc.findTagByName(savedTag.getTagName());
 		assertThat(optTag.isPresent());
 	}
 	
@@ -61,11 +63,11 @@ public class TagCRUDTest {
 	@DisplayName("04 Update Tag")
 	public void updateTag() {
 		Tag savedTag = em.persistAndFlush(createTestTag1());
-		savedTag.setName("Soon-To-Expire");
+		savedTag.setTagName("Soon-To-Expire");
 		Tag updatedTag = tagSvc.saveTag(savedTag);
-		assertThat(updatedTag.getName())
+		assertThat(updatedTag.getTagName())
 			.isNotNull()
-			.isEqualTo(savedTag.getName());
+			.isEqualTo(savedTag.getTagName());
 	}
 	
 	// delete tag
@@ -73,7 +75,7 @@ public class TagCRUDTest {
 	@DisplayName("05 Delete Tag")
 	public void deleteTag() {
 		Tag savedTag = em.persistAndFlush(createTestTag1());
-		tagSvc.deleteTagByName(savedTag.getName());
+		tagSvc.deleteTagByName(savedTag.getTagName());
 		Tag retrievedTag = em.find(Tag.class, savedTag.getId());
 		assertThat(retrievedTag).isNull(); // should be null
 	}

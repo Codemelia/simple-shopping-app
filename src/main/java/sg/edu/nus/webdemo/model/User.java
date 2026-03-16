@@ -2,53 +2,67 @@ package sg.edu.nus.webdemo.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.format.annotation.DateTimeFormat;
-
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity // declare as entity
 @Table(name = "users") // create table to store class data
 public class User {
 	
-	@Id // declare as id
-	@GeneratedValue(strategy = GenerationType.IDENTITY) // DB generates data as identity
-	private Long id;
-	
-	@Column(length = 15) // declare as column with length limit = 12
-	private String username;
-	
-	@Column(length = 15)
-	private String password;
-	
-	@Column(length = 254)
-	private String email;
-	
-	@Column(length = 25)
-	private String firstName;
-	@Column(length = 25)
-	private String lastName;
-	
-	@DateTimeFormat
-	private LocalDate birthDate;
-	
-	@CreatedDate
-	@DateTimeFormat // declare object as date time
-	private LocalDateTime createdAt;
+	 @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 50)
+    private String username;
+
+    @Column(nullable = false, unique = true, length = 120)
+    private String email;
+
+    @Column(nullable = false, length = 120)
+    private String userPassword;
+
+    @Column(length = 60)
+    private String firstName;
+
+    @Column(length = 60)
+    private String lastName;
+
+    /** java.time.LocalDate → DATE column */
+    private LocalDate birthDate;
+
+    /** java.time.LocalDateTime → TIMESTAMP column */
+    private LocalDateTime createdAt;
+
+    private Boolean active;
+
+    /** @OneToOne – bidirectional; Cart holds the FK (user_id). */
+    // It is reverse because User can exist without Cart. But not the otherway.
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Cart cart;
+
+    /** @OneToMany – one user → many purchase orders. */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PurchaseOrder> orders = new ArrayList<>();
 	
 	public Long getId() { return id; }
-	public void setId(Long id) { this.id = id; }
 	public String getUsername() { return username; }
 	public void setUsername(String username) { this.username = username; }
-	public String getPassword() { return password; }
-	public void setPassword(String password) { this.password = password; }
+	public String getUserPassword() { return userPassword; }
+	public void setUserPassword(String userPassword) { this.userPassword = userPassword; }
 	public LocalDateTime getCreatedAt() { return createdAt; }
 	public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 	public String getEmail() { return email; }
@@ -59,37 +73,56 @@ public class User {
 	public void setLastName(String lastName) { this.lastName = lastName; }
 	public LocalDate getBirthDate() { return birthDate; }
 	public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
+	public Boolean getActive() { return active; }
+	public void setActive(Boolean active) { this.active = active; }
+	public Cart getCart() { return cart; }
+	public void setCart(Cart cart) { this.cart = cart; }
+	public List<PurchaseOrder> getOrders() { return orders; }
+	public void setOrders(List<PurchaseOrder> orders) { 
+		this.orders = orders;
+		this.active = true; // set user to active once they place an order
+	}
+	
+    @PrePersist
+    protected void onCreate() {
+        if (this.active == null) this.active = true;
+    }
 	
 	public User() { super(); }
 	
-	public User(Long id, String username, String password, LocalDateTime createdAt) {
+	// create/update timestamps updated on mysql
+	public User(String username,  String password, String email, 
+		String firstName, String lastName, LocalDate birthDate, Boolean active) {
 		super();
 		this.username = username;
-		this.password = password;
-		this.createdAt = LocalDateTime.now();
-	}
-	
-	public User(String username, String password, String email,
-		String firstName, String lastName, LocalDate birthDate) {
-		super();
-		this.username = username;
-		this.password = password;
 		this.email = email;
+		this.userPassword = password;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.birthDate = birthDate;
-		this.createdAt = LocalDateTime.now();
+		this.active = active;
+	}
+	
+	public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+	public User(String username, String password) {
+		super();
+		this.username = username;
+		this.userPassword = password;
 	}
 	
 	@Override
 	public String toString() {
-		return "User [id=" + id + ", username=" + username + ", password=" + password + ", email=" + email
+		return "User [id=" + id + ", username=" + username + ", userPassword=" + userPassword + ", email=" + email
 				+ ", firstName=" + firstName + ", lastName=" + lastName + ", birthDate=" + birthDate + ", createdAt="
-				+ createdAt + "]";
+				+ createdAt + ", active=" + active + "]";
 	}
+	
 	@Override
 	public int hashCode() {
-		return Objects.hash(birthDate, createdAt, email, firstName, id, lastName, password, username);
+		return Objects.hash(id);
 	}
 	
 	@Override
@@ -101,10 +134,7 @@ public class User {
 		if (getClass() != obj.getClass())
 			return false;
 		User other = (User) obj;
-		return Objects.equals(birthDate, other.birthDate) && Objects.equals(createdAt, other.createdAt)
-				&& Objects.equals(email, other.email) && Objects.equals(firstName, other.firstName)
-				&& Objects.equals(id, other.id) && Objects.equals(lastName, other.lastName)
-				&& Objects.equals(password, other.password) && Objects.equals(username, other.username);
+		return Objects.equals(id, other.id);
 	}
-
+	
 }
